@@ -1,13 +1,21 @@
 <?php
-include 'koneksi.php';
-//total stok
-$total_item = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM products"));
-//total transaksi barang masuk
-$total_barang_masuk = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM stock_logs WHERE change_type = 'ADD'"));
-//total transaksi barang keluar
-$total_barang_keluar = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM stock_logs WHERE change_type = 'REDUCE'"));
-//total transaksi barang kritis
-$total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM products WHERE stock <= min_stock"));
+include "koneksi.php";
+$id = $_GET['id'];
+$sql = mysqli_query($conn, "SELECT * FROM categories WHERE id = '$id'");
+$hasil = mysqli_fetch_array($sql);
+if (isset($_POST['update'])) {
+
+    $nm_kat = $_POST['nm_kat'];
+
+    $query = mysqli_query($conn, "UPDATE categories SET category_name = '$nm_kat' WHERE id='$id'");
+    if ($query) {
+        echo "<script>alert('Data berhasil diubah!')</script>";
+        header("refresh:0, kategori_produk.php");
+    } else {
+        echo "<script>alert('Data gagal diubah!')</script>";
+        header("refresh:0, kategori_produk.php");
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +24,7 @@ $total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM product
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Laporan - Inventory Andre</title>
+  <title>Kategoori Produk - Inventory Andre</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -57,6 +65,7 @@ $total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM product
 
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
+        <li class="nav-item dropdown">
         <li class="nav-item dropdown pe-3">
 
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
@@ -103,7 +112,7 @@ $total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM product
             </li>
 
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="#">
+              <a class="dropdown-item d-flex align-items-center" href="login.php">
                 <i class="bi bi-box-arrow-right"></i>
                 <span>Sign Out</span>
               </a>
@@ -129,7 +138,7 @@ $total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM product
         </a>
       </li><!-- End Dashboard Nav -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="kategori_produk.php">
+        <a class="nav-link " href="kategori_produk.php">
           <i class="bi bi-tags"></i>
           <span>Kategori Produk</span>
         </a>
@@ -143,7 +152,7 @@ $total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM product
       </li><!-- End Data Produk Page Nav -->
 
       <li class="nav-item">
-        <a class="nav-link " href="laporan.php">
+        <a class="nav-link collapsed" href="laporan.php">
           <i class="bi bi-bar-chart-line"></i>
           <span>Laporan</span>
         </a>
@@ -162,69 +171,39 @@ $total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM product
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Laporan</h1>
+      <h1>Kategori Produk</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
-          <li class="breadcrumb-item active">Laporan</li>
+          <li class="breadcrumb-item"><a href="kategori_produk.php">Kategori Produk</a></li>
+          <li class="breadcrumb-item active">Edit</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
-    <!-- Laporan Stok Barang -->
     <section class="section">
-      <div class="row">
         <div class="col-lg-6">
-          <div class="card shadow-sm">
+          <div class="card">
             <div class="card-body">
-              <h5 class="card-title">Laporan Stok Barang</h5>
-              <p class="text-muted">Menampilkan seluruh data stok barang saat ini.</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-primary">Total Item: <?= $total_item; ?></span>
-                <a href="laporan_stok.php" class="btn btn-sm btn-primary">Lihat Laporan</a>
-              </div>
+              <h5 class="card-title">Edit Kategori Produk</h5>
+              <!-- Vertical Form -->
+              <form class="row g-3" method="post">
+                <div class="col-12">
+                  <label for="kd_kat" class="form-label">Kode Kategori</label>
+                  <input type="text" class="form-control" id="kd_kat" name="kd_kat" value="<?php echo $hasil["kd_kat"]; ?>" readonly>
+                </div>
+                <div class="col-12">
+                  <label for="nm_kat" class="form-label">Nama Kategori</label>
+                  <input type="text" class="form-control" id="nm_kat" name="nm_kat" value="<?php echo $hasil["category_name"]; ?>" required>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-warning"><a href="kategori_produk.php" style="color: black; text-decoration:none;">Kembali</a></button>
+                  <button type="reset" class="btn btn-secondary">Reset</button>
+                  <button type="submit" class="btn btn-success" name="update">Update</button>
+                </div>
+              </form><!-- Vertical Form -->
             </div>
           </div>
         </div>
-        <!-- Laporan Barang Masuk -->
-        <div class="col-lg-6">
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">Laporan Barang Masuk</h5>
-              <p class="text-muted">Riwayat barang yang masuk ke gudang.</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-success">Total Transaksi: <?= $total_barang_masuk; ?></span>
-                <a href="laporan_barang_masuk.php" class="btn btn-sm btn-success">Lihat Laporan</a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Laporan Barang Keluar -->
-        <div class="col-lg-6">
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">Laporan Barang Keluar</h5>
-              <p class="text-muted">Riwayat barang yang keluar dari gudang.</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-danger">Total Transaksi: <?= $total_barang_keluar; ?></span>
-                <a href="laporan_barang_keluar.php" class="btn btn-sm btn-danger">Lihat Laporan</a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Laporan Stok Minimum --> 
-        <div class="col-lg-6">
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title text-warning">Stok Minimum</h5>
-              <p class="text-muted">Barang dengan stok hampir habis.</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-warning">Item Kritis: <?= $total_stok_kritis; ?></span>
-                <a href="laporan_stok_minimum.php" class="btn btn-sm btn-warning" target="_blank">Lihat Laporan</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
 
   </main><!-- End #main -->
@@ -239,7 +218,7 @@ $total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM product
       <!-- You can delete the links only if you purchased the pro version. -->
       <!-- Licensing information: https://bootstrapmade.com/license/ -->
       <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
-      <a href="#">Inventory Andre</a>
+      Designed by <a href="#">Inventory Andre</a>
     </div>
   </footer><!-- End Footer -->
 
