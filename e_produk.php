@@ -244,8 +244,7 @@ if (isset($_POST['update'])) {
                                 </div>
                                 <div class="col-12">
                                     <label for="min_stok" class="form-label">Minimal Stok</label>
-                                    <input type="number" class="form-control" id="min_stok" name="min_stok" value="<?php echo $hasil['min_stock']; ?>" required>
-                                </div>
+                                <input type="number" name="min_stok" value="<?= $data['minimal_stok']; ?>" class="form-control" required>                                </div>
                                 <div class="col-12">
                                     <label for="harga" class="form-label">Harga</label>
                                     <input type="number" class="form-control" id="harga" name="harga" value="<?php echo $hasil['price']; ?>" required>
