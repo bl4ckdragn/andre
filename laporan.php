@@ -1,13 +1,13 @@
 <?php
 include 'koneksi.php';
 //total stok
-$total_item = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM products"));
+$total_item = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM produk"));
 //total transaksi barang masuk
 $total_barang_masuk = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM stock_logs WHERE change_type = 'ADD'"));
 //total transaksi barang keluar
 $total_barang_keluar = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM stock_logs WHERE change_type = 'REDUCE'"));
 //total transaksi barang kritis
-$total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM products WHERE stock <= min_stock"));
+$total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM produk WHERE stock <= min_stock"));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -150,7 +150,7 @@ $total_stok_kritis = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM product
       </li><!-- End Laporan Page Nav -->
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="users.php">
+        <a class="nav-link collapsed" href="user.php">
           <i class="bi bi-people"></i>
           <span>Manajemen User</span>
         </a>

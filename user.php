@@ -139,7 +139,7 @@
       </li><!-- End Laporan Page Nav -->
 
       <li class="nav-item">
-        <a class="nav-link " href="users.php">
+        <a class="nav-link " href="user.php">
           <i class="bi bi-people"></i>
           <span>Manajemen User</span>
         </a>
@@ -186,7 +186,7 @@
                 <?php
 include "koneksi.php";
 $no = 1;
-$sql = mysqli_query($conn, "SELECT * FROM users");
+$sql = mysqli_query($conn, "SELECT * FROM user");
 while ($data = mysqli_fetch_array($sql)) {
 ?>
     <tr>

@@ -139,7 +139,7 @@
             </li><!-- End Contact Page Nav -->
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="users.php">
+                <a class="nav-link collapsed" href="user.php">
                     <i class="bi bi-card-list"></i>
                     <span>Manajemen User</span>
                 </a>
@@ -203,7 +203,7 @@
                                 
                                 <div class="text-center">
                                     <button type="button" class="btn btn-warning">
-                                        <a href="users.php" style="color: black; text-decoration:none;">Kembali</a>
+                                        <a href="user.php" style="color: black; text-decoration:none;">Kembali</a>
                                     </button>
                                     <button type="reset" class="btn btn-secondary">Reset</button>
                                     <button type="submit" class="btn btn-success" name="simpan">Simpan</button>
