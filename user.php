@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Users - Inventory Andre</title>
+  <title>User - Inventory Andre</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -107,7 +107,7 @@
   </header><!-- End Header -->
 
   <!-- ======= Sidebar ======= -->
-   <aside id="sidebar" class="sidebar">
+  <aside id="sidebar" class="sidebar">
 
     <ul class="sidebar-nav" id="sidebar-nav">
 
@@ -151,11 +151,11 @@
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Data Tables</h1>
+      <h1>Manajemen User</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
-          <li class="breadcrumb-item active">Users</li>
+          <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+          <li class="breadcrumb-item active">Manajemen User</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
@@ -165,68 +165,89 @@
         <div class="col-lg-12">
 
           <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Datatables</h5>
-              <p>Add lightweight datatables to your project with using the <a href="https://github.com/fiduswriter/Simple-DataTables" target="_blank">Simple DataTables</a> library. Just add <code>.datatable</code> class name to any table you wish to conver to a datatable</p>
-
-              <!-- Table with stripped rows -->
-              <table class="table datatable">
-                <thead>
-                  <tr>
-                    <th scope="col">no</th>
-                    <th scope="col">Nama</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Role</th>
-                    <th scope="col">Status</th>
-                     <th scope="col">Dibuat</th>
-                      <th scope="col">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                <?php
-include "koneksi.php";
-$no = 1;
-$sql = mysqli_query($conn, "SELECT * FROM user");
-while ($data = mysqli_fetch_array($sql)) {
-?>
-    <tr>
-        <td><?php echo $no++; ?></td>
-        <td><?php echo $data['name']; ?></td>
-        <td><?php echo $data['email']; ?></td>
-        <td><?php echo ucfirst($data['role']); ?></td>
-        
-        <td>
-            <?php
-            if ($data['is_active'] == 1) {
-                echo '<span class="badge bg-success">Aktif</span>';
-            } else {
-                echo '<span class="badge bg-danger">Nonaktif</span>';
-            }
-            ?>
-        </td>
-
-        <td><?php echo date('d-m-Y H:i', strtotime($data['created_at'])); ?></td>
-
-        <td>
-            <a href="e_user.php?id=<?php echo $data['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-            <a href="h_user.php?id=<?php echo $data['id']; ?>" 
-               class="btn btn-danger btn-sm" 
-               onclick="return confirm('Apakah Anda yakin ingin menghapus user ini?')">
-               Hapus
-            </a>
-        </td>
-    </tr>
-<?php } ?>
-                </tbody>
-              </table>
-              <!-- End Table with stripped rows -->
-
+            <div class="card-body mt-3">
+              <a href="t_user.php" class="btn btn-primary"> Tambah Data</a>
             </div>
           </div>
-
         </div>
       </div>
-    </section>
+      <section class="section">
+        <div class="row">
+          <div class="col-lg-12">
+
+            <div class="card">
+              <div class="card-body mt-3">
+
+                <!-- Table with stripped rows -->
+                <table class="table datatable">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Nama</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Dibuat</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php
+                    include "koneksi.php";
+
+                    $no = 1;
+                    $sql = mysqli_query($conn, "SELECT * FROM user");
+
+                    while ($data = mysqli_fetch_array($sql)) {
+                    ?>
+
+                      <tr>
+                        <td><?php echo $no++; ?></td>
+
+                        <td><?php echo $data['name']; ?></td>
+
+                        <td><?php echo $data['email']; ?></td>
+
+                        <td><?php echo ucfirst($data['role']); ?></td>
+
+                        <td>
+                          <?php
+                          if ($data['is_active'] == 1) {
+                            echo '<span class="badge bg-success">Aktif</span>';
+                          } else {
+                            echo '<span class="badge bg-danger">Nonaktif</span>';
+                          }
+                          ?>
+                        </td>
+
+                        <td>
+                          <?php echo date('d-m-Y H:i', strtotime($data['created_at'])); ?>
+                        </td>
+
+                        <td>
+                          <a href="e_user.php?id=<?php echo $data['id']; ?>"
+                            class="btn btn-warning btn-sm">
+                            Edit
+                          </a>
+
+                          <a href="h_user.php?id=<?php echo $data['id']; ?>"
+                            class="btn btn-danger btn-sm"
+                            onclick="return confirm('Apakah Anda yakin ingin menghapus user ini?')">
+                            Hapus
+                          </a>
+                        </td>
+                      </tr>
+                    <?php } ?>
+                  </tbody>
+                </table>
+                <!-- End Table with stripped rows -->
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
 
   </main><!-- End #main -->
 
@@ -240,7 +261,7 @@ while ($data = mysqli_fetch_array($sql)) {
       <!-- You can delete the links only if you purchased the pro version. -->
       <!-- Licensing information: https://bootstrapmade.com/license/ -->
       <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
-      Designed by <a href="#">Inventory Andre</a>
+      Designed by <a href="https://www.instagram.com/najwaluthfii/">Inventory Andre</a>
     </div>
   </footer><!-- End Footer -->
 
