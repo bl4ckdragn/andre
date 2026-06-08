@@ -1,45 +1,58 @@
 <?php
+session_start();
 include "koneksi.php";
 
-$auto = mysqli_query($conn, "select max(product_code) as max_code from produk");
+if (!isset($_SESSION["login"])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Auto kode produk
+$auto = mysqli_query($conn, "SELECT max(product_code) as max_code FROM produk");
 $hasil = mysqli_fetch_array($auto);
 $code = $hasil['max_code'];
+
 if ($code == NULL) {
     $urutan = 0;
 } else {
-    $urutan = (int) substr($code, 1, 3);
+    // Ambil angka saja dari kode, abaikan huruf
+    $urutan = (int) preg_replace('/[^0-9]/', '', $code);
 }
 $urutan++;
-$huruf = "P";
-$kd_produk = $huruf . sprintf("%03s", $urutan);
+$kd_produk = "P" . sprintf("%03d", $urutan);
+
 if (isset($_POST['simpan'])) {
-    $nm_produk = $_POST['nm_produk'];
-    $stok = $_POST['stok'];
-    $min_stok = $_POST['min_stok'];
-    $harga = $_POST['harga'];
-    $id_kategori = $_POST['id_kategori'];
+    $nm_produk   = mysqli_real_escape_string($conn, $_POST['nm_produk']);
+    $stok        = intval($_POST['stok']);
+    $min_stok    = intval($_POST['min_stok']);
+    $harga       = intval($_POST['harga']);
+    $id_kategori = intval($_POST['id_kategori']);
+    $created_by  = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 1;
 
     // Upload Gambar
-    $imgfile = $_FILES['gambar']['name'];
-    $tmp_file = $_FILES['gambar']['tmp_name'];
+    $imgfile   = $_FILES['gambar']['name'];
+    $tmp_file  = $_FILES['gambar']['tmp_name'];
     $extension = strtolower(pathinfo($imgfile, PATHINFO_EXTENSION));
+    $dir       = "produk_img/";
+    $allowed   = array("jpg", "jpeg", "png", "webp");
 
-    $dir = "produk_img/";
-    $allowed_extensions = array("jpg", "jpeg", "png", "webp");
-
-    if (!in_array($extension, $allowed_extensions)) {
-        echo "<script>alert('Format tidak valid. Hanya jpg, jpeg, png, dan webp yang diperbolehkan.');</script>";
+    if (!in_array($extension, $allowed)) {
+        echo "<script>alert('Format tidak valid. Hanya jpg, jpeg, png, dan webp.');</script>";
     } else {
         $imgnewfile = md5(time() . $imgfile) . "." . $extension;
         move_uploaded_file($tmp_file, $dir . $imgnewfile);
 
-        $query = mysqli_query($conn, "INSERT INTO produk(category_id, product_code, product_name, stock, min_stock, price, gambar) VALUES ('$id_kategori', '$kd_produk', '$nm_produk', '$stok', '$min_stok', '$harga', '$imgnewfile')");
+        $query = mysqli_query($conn, "INSERT INTO produk(category_id, product_code, product_name, stock, min_stock, price, gambar) 
+            VALUES ('$id_kategori', '$kd_produk', '$nm_produk', '$stok', '$min_stok', '$harga', '$imgnewfile')");
+
         if ($query) {
-            echo "<script>alert('Produk berhasil ditambahkan!')</script>";
-            header("refresh:0, produk.php");
+            $product_id = mysqli_insert_id($conn);
+            mysqli_query($conn, "INSERT INTO stock_logs (product_id, change_type, qty, stock_before, stock_after, created_by, note)
+                VALUES ('$product_id', 'ADD', '$stok', '0', '$stok', '$created_by', 'Produk baru ditambahkan')");
+
+            echo "<script>alert('Produk berhasil ditambahkan!'); window.location='produk.php';</script>";
         } else {
-            echo "<script>alert('Produk gagal ditambahkan!')</script>";
-            header("refresh:0, produk.php");
+            echo "<script>alert('Produk gagal ditambahkan!');</script>";
         }
     }
 }
@@ -56,8 +69,8 @@ if (isset($_POST['simpan'])) {
     <meta content="" name="keywords">
 
     <!-- Favicons -->
-    <link href="assets/img/favicon.png" rel="icon">
-    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <link href="assets/img/logo1.png" rel="icon">
+    <link href="assets/img/logo1.png" rel="apple-touch-icon">
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect">
@@ -84,7 +97,7 @@ if (isset($_POST['simpan'])) {
 
     <div class="d-flex align-items-center justify-content-between">
       <a href="index.php" class="logo d-flex align-items-center">
-        <img src="assets/img/logo.png" alt="">
+        <img src="assets/img/logo1.png" alt="">
         <span class="d-none d-lg-block">Inventory Andre</span>
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
@@ -97,7 +110,7 @@ if (isset($_POST['simpan'])) {
         <li class="nav-item dropdown pe-3">
 
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-            <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+            <img src="assets/img/logo2.jpg" alt="Profile" class="rounded-circle">
           </a><!-- End Profile Iamge Icon -->
 
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
@@ -277,7 +290,7 @@ if (isset($_POST['simpan'])) {
             &copy; Copyright <strong><span>Inventory Andre</span></strong>. All Rights Reserved
         </div>
         <div class="credits">
-            Designed by <a href="#">Inventory Andre</a>
+            Designed by <a href="#">Andre</a>
         </div>
     </footer><!-- End Footer -->
 

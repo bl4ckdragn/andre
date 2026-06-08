@@ -1,57 +1,68 @@
 <?php
+session_start();
 include "koneksi.php";
-$id = $_GET['id'];
+
+if (!isset($_SESSION["login"])) {
+    header("Location: login.php");
+    exit;
+}
+
+$id = intval($_GET['id']);
 $query = mysqli_query($conn, "SELECT * FROM produk WHERE id = '$id'");
 $hasil = mysqli_fetch_array($query);
+$stok_lama = $hasil['stock'];
+
 if (isset($_POST['update'])) {
-    $nm_produk = $_POST['nm_produk'];
-    $stok = $_POST['stok'];
-    $min_stok = $_POST['min_stok'];
-    $harga = $_POST['harga'];
-    $id_kategori = $_POST['id_kategori'];
+    $nm_produk   = mysqli_real_escape_string($conn, $_POST['nm_produk']);
+    $stok        = intval($_POST['stok']);
+    $min_stok    = intval($_POST['min_stok']);
+    $harga       = intval($_POST['harga']);
+    $id_kategori = intval($_POST['id_kategori']);
+    $created_by  = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : 1;
 
     $imgfile = $_FILES['gambar']['name'];
 
-    //upload gambar baru
     if ($imgfile != "") {
-        $tmp = $_FILES['gambar']['tmp_name'];
-        $ext = strtolower(pathinfo($imgfile, PATHINFO_EXTENSION));
+        $tmp     = $_FILES['gambar']['tmp_name'];
+        $ext     = strtolower(pathinfo($imgfile, PATHINFO_EXTENSION));
         $allowed = ["jpg", "jpeg", "png", "webp"];
 
-        if (in_array($ext, $allowed)) {
-            $imgnew= md5(time() . $imgfile) . "." . $ext;
-            move_uploaded_file($tmp, "produk_img/" . $imgnew);
-        
-            $update = mysqli_query($conn, "UPDATE produk SET 
-            category_id = '$id_kategori',
-            product_name = '$nm_produk',
-            stock = '$stok',
-            min_stock = '$min_stok',
-            price = '$harga',
-            gambar = '$imgnew'
-            WHERE id = '$id'
-            ");
+        if (!in_array($ext, $allowed)) {
+            echo "<script>alert('Format gambar tidak valid');</script>";
         } else {
-        echo "<script>alert('Format gambar tidak valid');</script>";
-        return;
+            $imgnew = md5(time() . $imgfile) . "." . $ext;
+            move_uploaded_file($tmp, "produk_img/" . $imgnew);
+
+            $update = mysqli_query($conn, "UPDATE produk SET 
+                category_id  = '$id_kategori',
+                product_name = '$nm_produk',
+                stock        = '$stok',
+                min_stock    = '$min_stok',
+                price        = '$harga',
+                gambar       = '$imgnew'
+                WHERE id     = '$id'");
         }
     } else {
-        //Tanpa ganti gambar 
-      $update = mysqli_query($conn, "UPDATE produk SET 
-            category_id = '$id_kategori',
+        $update = mysqli_query($conn, "UPDATE produk SET 
+            category_id  = '$id_kategori',
             product_name = '$nm_produk',
-            stock = '$stok',
-            min_stock = '$min_stok',
-            price = '$harga'
-            WHERE id = '$id'
-        ");
+            stock        = '$stok',
+            min_stock    = '$min_stok',
+            price        = '$harga'
+            WHERE id     = '$id'");
     }
+
     if ($update) {
-        echo "<script>alert('Data berhasil diubah!')</script>";
-        header("refresh:0, produk.php");
+        // Insert stock_logs jika stok berubah
+        if ($stok != $stok_lama) {
+            $selisih     = abs($stok - $stok_lama);
+            $change_type = ($stok > $stok_lama) ? 'ADD' : 'REDUCE';
+            mysqli_query($conn, "INSERT INTO stock_logs (product_id, change_type, qty, stock_before, stock_after, created_by, note)
+                VALUES ('$id', '$change_type', '$selisih', '$stok_lama', '$stok', '$created_by', 'Edit produk')");
+        }
+        echo "<script>alert('Data berhasil diubah!'); window.location='produk.php';</script>";
     } else {
-        echo "<script>alert('Data gagal diubah!')</script>";
-        header("refresh:0, produk.php");
+        echo "<script>alert('Data gagal diubah!');</script>";
     }
 }
 ?>
@@ -67,8 +78,8 @@ if (isset($_POST['update'])) {
     <meta content="" name="keywords">
 
     <!-- Favicons -->
-    <link href="assets/img/favicon.png" rel="icon">
-    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <link href="assets/img/logo1.png" rel="icon">
+    <link href="assets/img/logo1.png" rel="apple-touch-icon">
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect">
@@ -95,7 +106,7 @@ if (isset($_POST['update'])) {
 
     <div class="d-flex align-items-center justify-content-between">
       <a href="index.php" class="logo d-flex align-items-center">
-        <img src="assets/img/logo.png" alt="">
+        <img src="assets/img/logo1.png" alt="">
         <span class="d-none d-lg-block">Inventory Andre</span>
       </a>
       <i class="bi bi-list toggle-sidebar-btn"></i>
@@ -108,7 +119,7 @@ if (isset($_POST['update'])) {
         <li class="nav-item dropdown pe-3">
 
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-            <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
+            <img src="assets/img/logo2.jpg" alt="Profile" class="rounded-circle">
           </a><!-- End Profile Iamge Icon -->
 
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
@@ -244,7 +255,7 @@ if (isset($_POST['update'])) {
                                 </div>
                                 <div class="col-12">
                                     <label for="min_stok" class="form-label">Minimal Stok</label>
-                                <input type="number" name="min_stok" value="<?= $data['minimal_stok']; ?>" class="form-control" required>                                </div>
+                                    <input type="number" class="form-control" id="min_stok" name="min_stok" value="10" required>                                </div>
                                 <div class="col-12">
                                     <label for="harga" class="form-label">Harga</label>
                                     <input type="number" class="form-control" id="harga" name="harga" value="<?php echo $hasil['price']; ?>" required>
@@ -287,10 +298,10 @@ if (isset($_POST['update'])) {
     <!-- ======= Footer ======= -->
     <footer id="footer" class="footer">
         <div class="copyright">
-            &copy; Copyright <strong><span>Nama Sistem</span></strong>. All Rights Reserved
+            &copy; Copyright <strong><span>Inventory Andre</span></strong>. All Rights Reserved
         </div>
         <div class="credits">
-            Designed by <a href="#">Inventory Andre</a>
+            Designed by <a href="https://www.instagram.com/andrx_xyzzz?igsh=MW9idTVuMTQ3cWs0bA==">Andre</a>
         </div>
     </footer><!-- End Footer -->
 

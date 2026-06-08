@@ -148,15 +148,23 @@ foreach ($data as $row) {
         $status = '<span class="stok-aman">Aman</span>';
     }
 
-    // Path gambar
-    $gambar = 'produk_img/' . $row['gambar'];
+  // Path gambar
+$gambarPath = __DIR__ . '/produk_img/' . $row['gambar'];
 
-    // Jika gambar kosong
-    if (empty($row['gambar']) || !file_exists($gambar)) {
+// Jika gambar kosong atau tidak ada
+if (empty($row['gambar']) || !file_exists($gambarPath)) {
+    $gambarHtml = '-';
+} else {
+    $mime = mime_content_type($gambarPath);
+
+    // Jika WebP, skip (mPDF tidak support)
+    if ($mime === 'image/webp') {
         $gambarHtml = '-';
     } else {
-        $gambarHtml = '<img src="' . $gambar . '">';
+        // Format lain (jpg, png) langsung pakai path absolut
+        $gambarHtml = '<img src="' . $gambarPath . '">';
     }
+}
 
     $html .= '
         <tr>
